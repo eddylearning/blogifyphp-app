@@ -1,4 +1,4 @@
-<?php include('../layouts/navbar.php');
+<?php include('../layout/navbar.php');
 
 // process the form
 
@@ -20,9 +20,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $sql = "INSERT INTO users (username, email, password) VALUES (:username, :email, :password)";
             $stmt = $conn->prepare($sql);
 
-            $stmt->bindParam(":username",var: $username);
-            $stmt->bindParam(":email",var: $email);
-            $stmt->bindParam(":password",var: $hashedpassword);
+            // $stmt->bindParam(":username",var: $username);
+            // $stmt->bindParam(":email",var: $email);
+            // $stmt->bindParam(":password",var: $hashedpassword);
+            $stmt->bindParam(":username", $username);
+            $stmt->bindParam(":email", $email);
+            $stmt->bindParam(":password", $hashedpassword);
+
 
             if ($stmt->execute()) {
                 echo "Registration successful";
@@ -115,4 +119,4 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
   </form>
 </div>
 
-<?php include('../layouts/footer.php'); ?>
+<?php include('../layout/footer.php'); ?>

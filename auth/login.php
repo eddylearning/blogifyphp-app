@@ -1,47 +1,43 @@
-<!-- .<?php include('../layout/navbar.php');
+<?php
 
-// process the form
 
-// connection
 require('../db.php');
+session_start();
 
-// login
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    
     $email = trim($_POST["email"]);
     $password = trim($_POST["password"]);
 
-    if (!empty ($email) && !empty($password)) {
-        // hash password
-        $hashedpassword = password_hash($password, PASSWORD_DEFAULT);
-
+    if (!empty($email) && !empty($password)) {
         try {
-            // sql
-            // $sql = "INSERT INTO users (username, email, password) VALUES (:username, :email, :password)";
-            // $stmt = $conn->prepare($sql);
-
-          //  $stmt->bindParam(":username",var: $username);
-            // $stmt->bindParam(":email",varchar: $email);
-            // $stmt->bindParam(":password",var: $hashedpassword);
-
-            // if ($stmt->execute()) {
-            //     echo "Registration successful";
-            $sql="SELECT * FROM user WHERE email =:email LIMIT 1";
-            $stmt= $conn->prepare(query:$sql);
-            $stmt->bindParam(param: ":email", var:$email);
+            //check for user in db
+            $sql = "SELECT * FROM users WHERE email = :email LIMIT 1";
+            $stmt = $conn->prepare($sql);
+            $stmt->bindParam(":email", $email);
             $stmt->execute();
-            $user =$stmt->fetch(mode: PDD::FETCH_ASSOC);
-            
-            if $
+
+            $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if ($user && password_verify($password, $user['password'])) {
+                // store session
+                $_SESSION["user_id"] = $user["id"];
+                $_SESSION["username"] = $user["username"];
+
+                header("Location: ../users/dashboard.php");
+                exit();
+            } else {
+                echo  "Invalid email or password!";
             }
         } catch (PDOException $e) {
-            echo "An error occurred: " . $e->getMessage();
+            echo  "Error: " . $e->getMessage();
         }
     } else {
-        echo "All fields are required";
+        echo  "Please fill in all fields.";
     }
 }
 ?>
+
+<?php include('../layout/navbar.php'); ?>
 
 <style>
   body {
@@ -54,7 +50,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
   .form-container {
     width: 100%;
     max-width: 400px;
-    margin: 50px auto;
+    margin: 60px auto;
     background: #fff;
     padding: 25px;
     border-radius: 12px;
@@ -104,140 +100,55 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
   .form-container button:hover {
     background: #0056b3;
   }
+
+  .error {
+    background: #ffe6e6;
+    color: #cc0000;
+    padding: 10px;
+    border-radius: 6px;
+    margin-bottom: 15px;
+    text-align: center;
+    font-size: 14px;
+  }
+
+  .extra-links {
+    text-align: center;
+    margin-top: 12px;
+    font-size: 14px;
+  }
+
+  .extra-links a {
+    color: #007bff;
+    text-decoration: none;
+  }
+
+  .extra-links a:hover {
+    text-decoration: underline;
+  }
 </style>
 
 <div class="form-container">
-  <h3>Register</h3>
-  <form action="" method="POST">
-    <label for="username">User Name:</label>
-    <input type="text" name="username" id="username" required>
+  <h3>Login</h3>
 
+  <?php if (!empty($error)) : ?>
+    <div class="error"><?php echo $error; ?></div>
+  <?php endif; ?>
+
+  <form action="" method="POST">
     <label for="email">Enter Email:</label>
     <input type="email" name="email" id="email" required>
 
     <label for="password">Enter Password:</label>
     <input type="password" name="password" id="password" required>
 
-    <button type="submit">Submit</button>
-  </form>
-</div>
-
-//<?php include('../layouts/footer.php'); ?> -->
-
-<?php 
-include('../layouts/navbar.php'); // Adjust path if necessary
-
-// Connect to DB
-require('../dp.php');
-
-// Handle form submit
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-
-    $email = trim($_POST["email"]);
-    $password = trim($_POST["password"]);
-
-    if (!empty($email) && !empty($password)) {
-        try {
-            // Check if user exists
-            $sql = "SELECT * FROM users WHERE email = :email LIMIT 1";
-            $stmt = $conn->prepare($sql);
-            $stmt->bindParam(":email", $email);
-            $stmt->execute();
-            $user = $stmt->fetch(PDO::FETCH_ASSOC);
-
-            if ($user && password_verify($password, $user['password'])) {
-                echo "✅ Login successful. Welcome, " . htmlspecialchars($user['username']) . "!";
-                // Optionally set session and redirect
-            } else {
-                echo "❌ Invalid email or password.";
-            }
-
-        } catch (PDOException $e) {
-            echo "❌ Error: " . $e->getMessage();
-        }
-
-    } else {
-        echo "❗ All fields are required.";
-    }
-}
-?>
-
-<style>
-  body {
-    font-family: Arial, sans-serif;
-    background: #f5f6fa;
-    margin: 0;
-    padding: 0;
-  }
-
-  .form-container {
-    width: 100%;
-    max-width: 400px;
-    margin: 50px auto;
-    background: #fff;
-    padding: 25px;
-    border-radius: 12px;
-    box-shadow: 0 6px 15px rgba(0,0,0,0.1);
-  }
-
-  .form-container h3 {
-    text-align: center;
-    margin-bottom: 20px;
-    color: #333;
-  }
-
-  .form-container label {
-    display: block;
-    font-weight: bold;
-    margin-bottom: 6px;
-    color: #444;
-  }
-
-  .form-container input {
-    width: 100%;
-    padding: 10px;
-    margin-bottom: 18px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    transition: 0.3s;
-  }
-
-  .form-container input:focus {
-    border-color: #007bff;
-    outline: none;
-    box-shadow: 0 0 5px rgba(0,123,255,0.3);
-  }
-
-  .form-container button {
-    width: 100%;
-    padding: 12px;
-    background: #007bff;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    font-size: 16px;
-    cursor: pointer;
-    transition: background 0.3s;
-  }
-
-  .form-container button:hover {
-    background: #0056b3;
-  }
-</style>
-
-<div class="form-container">
-  <h3>Login</h3>
-  <form action="" method="POST">
-    <label for="email">Email:</label>
-    <input type="email" name="email" id="email" required>
-
-    <label for="password">Password:</label>
-    <input type="password" name="password" id="password" required>
-
     <button type="submit">Login</button>
   </form>
+
+  <div class="extra-links">
+    <p>Don't have an account? <a href="register.php">Register</a></p>
+  </div>
 </div>
 
 <?php include('../layout/footer.php'); ?>
 
-
+.

@@ -180,7 +180,7 @@
 
 <footer class="site">
     <div class="container foot-grid">
-      <div class="copyright">© <span id="year"></span> Ink & Ideas. All rights reserved.</div>
+      <div class="copyright">© <span id="year"></span> blogifyphp. All rights reserved.</div>
       <nav class="foot-links">
         <a href="#">About</a>
         <a href="#">Contact</a>

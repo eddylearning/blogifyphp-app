@@ -2,7 +2,7 @@
 $host = 'localhost';
 $db   = 'dayphp';
 $user = 'root';
-$pass = '';
+$password = '';
 $charset = 'utf8mb4';
 
 $dsn = "mysql:host=$host;dbname=$db;charset=$charset";
@@ -13,7 +13,7 @@ $options = [
 ];
 
 try {
-    $conn = new PDO($dsn, $user, $pass, $options);
+    $conn = new PDO($dsn, $user, $password, $options);
 } catch (PDOException $e) {
     die("Database connection failed: " . $e->getMessage());
 }

@@ -1,41 +1,48 @@
 <?php
-
-
 require('../db.php');
 session_start();
+//always ensure the hashing of the password
+//  in the datbase is diffrent when using 
+// same password for all users e.g pass123
+
+$error = ''; // initialize error variable
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    error_log("Form was submitted");
+
     $email = trim($_POST["email"]);
     $password = trim($_POST["password"]);
 
     if (!empty($email) && !empty($password)) {
         try {
-            //check for user in db
             $sql = "SELECT * FROM users WHERE email = :email LIMIT 1";
             $stmt = $conn->prepare($sql);
             $stmt->bindParam(":email", $email);
             $stmt->execute();
 
             $user = $stmt->fetch(PDO::FETCH_ASSOC);
+            var_dump($user);  // 🟡 Debug output: shows the fetched user or false
 
             if ($user && password_verify($password, $user['password'])) {
-                // store session
                 $_SESSION["user_id"] = $user["id"];
                 $_SESSION["username"] = $user["username"];
-
+                $_SESSION["role"] = $user["role"];
                 header("Location: ../users/dashboard.php");
                 exit();
             } else {
-                echo  "Invalid email or password!";
+                var_dump('Invalid login triggered'); // confirm login failed
+                $error = "Invalid email or password!";
             }
         } catch (PDOException $e) {
-            echo  "Error: " . $e->getMessage();
+            $error = "Error: " . $e->getMessage();
         }
     } else {
-        echo  "Please fill in all fields.";
+        $error = "Please fill in all fields.";
     }
 }
+
 ?>
+
 
 <?php include('../layout/navbar.php'); ?>
 
@@ -131,7 +138,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
   <h3>Login</h3>
 
   <?php if (!empty($error)) : ?>
-    <div class="error"><?php echo $error; ?></div>
+    <div class="error"><?php echo htmlspecialchars($error); ?></div>
   <?php endif; ?>
 
   <form action="" method="POST">
